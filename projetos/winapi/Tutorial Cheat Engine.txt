@@ -1,0 +1,36 @@
+método convencional
+Ache o endereço → metodo normal "first scan"
+gere o pointer map
+depois faça um pointer_scan utilizando esse pointer map gerado
+→ aparecerá uma lista de endereços, podemos filtra-la para exibir apenas no intervalo do programa, ou seja
+ → getAddress('nome_do_programa')
+ → getAddress('nome_do_programa')+getModuleSize('nome_do_programa')
+ → fazemos isso em add address manually
+→ para filtrar então vamos na lista do pointer_scan → Pointer scanner → rescan → value to find e define o intervalo
+
+→podemos ainda especificar qual o end offset quando vamos realizar o pointer_scan
+→normalmente achamos esse offeset indo em quem está acessando o endereço, ideal realizar uma ação, tipo na vida, curar, ae vemos o 
+efeito disso.
+→para isso botão direito na variavel e f5, find out what acess this adrres
+
+
+## podemos definir para o cheat engine atuar automaticamente quando o processo iniciar → edit
+
+o método para você afuniliar os resultados do pointer_scan é, fechar o jogo e ir no pointer_scan e dar re_scan no valor
+isso sem fechar a janela do pointer, e lembrando de reabrir no cheat_engine o processo
+
+
+um método avançado é utilizar dois pointer scan
+→ Entre no processo, ache o endereço e gere o pointer_map1
+→ Saia e entre novamente, ache outro endereço e gere o segundo pointer_map
+→ depois, clique na variável do processo corrente e vá para o pointer_scan
+→ use um pointer_map mas o da variável corrente
+→ depois vá em compare result com another pointer map, isso passando o outro pointer map, e o endereço da varia´vel gerada na 1º vez
+e gg
+
+podemos comparar com até mais
+
+
+
+
+

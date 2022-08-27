@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 use std::{thread::{self, JoinHandle}, time::Duration};
 use winapi::um::winnt::{HANDLE};
+use winapi::vc::vadefs::uintptr_t;
 mod auxiliares;
 mod winapi_;
 
@@ -11,16 +12,35 @@ struct Processo {
     id:u32,
     base:u32,
     handle: HANDLE,
+    valor_addr: u32,
 }
 
 impl Processo {
-    unsafe fn get_valor(&self) -> u32 {
+    unsafe fn get_valor(&mut self) -> uintptr_t {
         
-        0
+        // let mut offsets: [uintptr_t; 7] = [0x20, 0x4, 0x4, 0x1C8, 0x2C, 0x1A4, 0x54C];
+
+        if self.valor_addr != 0 {
+            return read_memory(self.handle, self.valor_addr as uintptr_t) as uintptr_t;
+        }
+
+        let mut offsets: [uintptr_t; 7] = [0x10, 0xD0, 0x668, 0x14, 0x50, 0x1A4, 0x5AC];
+
+        let dynamic_address: uintptr_t = self.base as uintptr_t + 0x00007000;
+
+        self.valor_addr = find_dma_addy(self.handle, dynamic_address, &mut offsets) as u32;
+
+        read_memory(self.handle, self.valor_addr as uintptr_t) as uintptr_t
     }
 }
 
 unsafe impl Send for Processo {}
+
+impl Default for Processo {
+    fn default() -> Self {
+        Self { id: 0, base: 0, handle: 0 as HANDLE, valor_addr: 0 }
+    }
+}
 
 
 unsafe fn get_new_process(processos: Arc<Mutex<Vec<Processo>>>,nome: &str) {
@@ -32,6 +52,7 @@ unsafe fn get_new_process(processos: Arc<Mutex<Vec<Processo>>>,nome: &str) {
                     id:processo,
                     base: get_module_base_addr(processo, nome) as u32,
                     handle: open_process(processo),
+                    ..Default::default()
                 });
             };
         } else {
@@ -63,7 +84,8 @@ unsafe fn get_new_process(processos: Arc<Mutex<Vec<Processo>>>,nome: &str) {
                 processos.lock().unwrap().push( Processo { 
                     id: add, 
                     base: get_module_base_addr(add, nome) as u32,
-                    handle: open_process(add)
+                    handle: open_process(add),
+                    ..Default::default()
                 });
             }
         }
@@ -97,6 +119,9 @@ fn main() {
                 loop {
                     println!("Pro: {:?}",vetor.lock().unwrap());
                     // println!("as");
+                    if vetor.lock().unwrap().len() > 0 {
+                        println!("Valor: {:?}",vetor.lock().unwrap()[0].get_valor());
+                    }
                     thread::sleep(Duration::from_millis(1000));
                 }
             });

@@ -60,11 +60,21 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
-        "resizable": true,
-        "title": "desktop-app",
-        "width": 800
+        "height": 0,
+        "resizable": false,
+        "title": "Change",
+        "width": 0,
+        "alwaysOnTop":true,
+        "transparent":true,
+        "decorations":false,
+        "x":1520,
+        "y":680
       }
-    ]
+    ],
+    "allowlist": {
+      "window": {
+        "all": true
+      }
+    }
   }
 }

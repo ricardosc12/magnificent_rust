@@ -1,4 +1,4 @@
-use std::mem;
+use std::cmp::Ordering::{Equal, Greater, Less};
 
 struct BinaryTree {
     node: Option<Box<Node>>,
@@ -45,32 +45,33 @@ impl Node {
         }
     }
 
-    fn delete(&mut self, value: u32) -> Option<Box<Node>> {
-        if self.value == value {
-            if self.left.is_none() {
-                return self.right.clone()
-            }
-            else if self.right.is_none() {
-                return self.left.clone()
-            }
-            else {
-                let mut node = self.left.clone();
+    fn delete(node: *mut Option<Box<Node>>, value: u32) {
+        unsafe {
+            if (*node).is_some() {
+                if value < (*node).as_ref().unwrap().value {
+                    Node::delete(&mut (*node).as_mut().unwrap().left, value)
+                } else if value > (*node).as_ref().unwrap().value {
+                    Node::delete(&mut (*node).as_mut().unwrap().right, value)
+                } else {
+                    if (*node).as_ref().unwrap().left.is_none() {
+                        (*node) = (*node).as_mut().unwrap().right.clone();
+                    }
+                    else if (*node).as_ref().unwrap().right.is_none() {
+                        (*node) = (*node).as_mut().unwrap().left.clone();
+                    }
+                    else {
+                        let mut suc = &mut (*node).as_mut().unwrap().right;
 
-                while node.as_ref().unwrap().right.is_some() {
-                    node = node.unwrap().right.clone();
+                        while (*suc).as_ref().unwrap().left.is_some() {
+                            suc = &mut (*suc).as_mut().unwrap().left;
+                        }
+
+                        (*node).as_mut().unwrap().value = suc.as_ref().unwrap().value;
+
+                        *suc = None;
+                    }
                 }
-
-                self.value = node.as_ref().unwrap().value;
-                node.as_mut().take();
-
-                return Some(Box::new(self.clone()));
             }
-        }
-        else if value < self.value {
-            return self.left.as_mut().unwrap().delete(value);
-        }
-        else {
-            return self.right.as_mut().unwrap().delete(value);
         }
     }
 }
@@ -96,8 +97,8 @@ impl BinaryTree {
 
     fn delete(&mut self, value: u32) {
         if self.node.is_some() {
-            // self.node = self.node.as_mut().unwrap().delete(value)
-            self.node.as_mut().unwrap().delete(value);
+            // self.node = self.node.as_mut().unwrap().delete(value);
+            Node::delete(&mut self.node, value);
         }
     }
 
@@ -114,17 +115,19 @@ impl BinaryTree {
 fn main() {
     let mut binary_tree = BinaryTree::create(10);
 
-    // binary_tree.insert(5);
-    binary_tree.insert(15);
-    // binary_tree.insert(3);
-    // binary_tree.insert(7);
+    // // binary_tree.insert(5);
+    binary_tree.insert(8);
+    // // binary_tree.insert(3);
+    binary_tree.insert(11);
+    binary_tree.insert(2);
+    binary_tree.insert(9);
+    // binary_tree.insert(18);
     // binary_tree.insert(11);
-    binary_tree.insert(17);
-    binary_tree.insert(14);
+    // binary_tree.insert(14);
 
     binary_tree.print_inoder();
 
-    binary_tree.delete(15);
+    binary_tree.delete(9);
 
     binary_tree.print_inoder();
 }
